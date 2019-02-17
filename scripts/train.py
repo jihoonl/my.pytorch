@@ -10,6 +10,7 @@ from capsnet.data import loader
 from capsnet.model.mnist_base import MnistBaseNet
 from capsnet.optimizer import get_optimizer
 
+import torch
 import torch.nn.functional as F
 
 
@@ -26,20 +27,36 @@ def parse_args():
     return parser.parse_args()
 
 
-def train(model, dataloader, device, optimizer, epoch):
+def train(model, dataloader, device, optimizer):
     model.train()
-    for idx, (data, target) in enumerate(dataloader):
+    final_loss = 0
+    for data, target in dataloader:
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+        final_loss = loss.detach().item()
+    return final_loss
 
-        if idx % cfg.TRAIN.LOG_INTERVAL == 0:
-            print('Train Epoch: {:3} [{:6}/{:6} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, idx * len(data), len(dataloader.dataset),
-                100. * idx / len(dataloader), loss.item()))
+
+def test(model, dataloader, device):
+    model.eval()
+    test_loss = 0
+    correct = 0
+
+    with torch.no_grad():
+        for data, target in dataloader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            test_loss += F.nll_loss(output, target, reduction='sum').item()
+            pred = output.argmax(dim=1, keepdim=True)
+            correct += pred.eq(target.view_as(pred)).sum().item()
+    test_loss /= len(dataloader.dataset)
+    accuracy = correct / len(dataloader.dataset)
+
+    return test_loss, accuracy
 
 
 def main():
@@ -65,7 +82,12 @@ def main():
     opt = get_optimizer(model.parameters())
 
     for e in range(1, epoch + 1):
-        train(model, train_loader, device, opt, e)
+        train_loss = train(model, train_loader, device, opt)
+        test_loss, accuracy = test(model, test_loader, device)
+        logger.info('Epoch [{:3}/{:3}] - Train Loss: {:.6f}, '
+                    'Test Loss: {:.6f}, '
+                    'Accuracy: {:.3f}'.format(e, epoch, train_loss, test_loss,
+                                              accuracy))
 
 
 if __name__ == '__main__':
