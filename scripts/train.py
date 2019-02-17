@@ -4,6 +4,7 @@ import argparse
 
 from capsnet.utils.logger import set_debug, logger
 from capsnet.utils.config import cfg_from_file, cfg
+from capsnet.utils.timer import Timer
 
 from capsnet.data.mnist import mnist
 from capsnet.data import loader
@@ -29,7 +30,6 @@ def parse_args():
 
 def train(model, dataloader, device, optimizer):
     model.train()
-    final_loss = 0
     for data, target in dataloader:
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -37,8 +37,6 @@ def train(model, dataloader, device, optimizer):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        final_loss = loss.detach().item()
-    return final_loss
 
 
 def test(model, dataloader, device):
@@ -78,16 +76,27 @@ def main():
     train_loader = loader.train(data['train'])
     test_loader = loader.test(data['test'])
     model = MnistBaseNet((28, 28))
-    model.to(device)
     opt = get_optimizer(model.parameters())
 
+    if cfg.GPU.MULTI:
+        model = torch.nn.DataParallel(model)
+    model.to(device)
+    logger.info(opt)
+
+    t = Timer()
     for e in range(1, epoch + 1):
-        train_loss = train(model, train_loader, device, opt)
-        test_loss, accuracy = test(model, test_loader, device)
-        logger.info('Epoch [{:3}/{:3}] - Train Loss: {:.6f}, '
-                    'Test Loss: {:.6f}, '
-                    'Accuracy: {:.3f}'.format(e, epoch, train_loss, test_loss,
-                                              accuracy))
+        t.tic()
+        train(model, train_loader, device, opt)
+        elapse = t.toc()
+        train_loss, train_accuracy = test(model, train_loader, device)
+        test_loss, test_accuracy = test(model, test_loader, device)
+        lr = opt.param_groups[0]['lr']
+        logger.info('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
+                    '(Train, Test) '
+                    'Loss: {:.6f} - {:.6f}, '
+                    'Acc: {:.4f} - {:.4f}'.format(e, epoch, elapse, lr,
+                                                 train_loss, test_loss,
+                                                 train_accuracy, test_accuracy))
 
 
 if __name__ == '__main__':

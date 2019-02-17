@@ -19,6 +19,7 @@ __C.GPU = AttrDict()
 __C.GPU.USE = num_gpu > 0
 # Note that it forces num gpu as 0 if GPU.USE is set false
 __C.GPU.NUM = lambda: num_gpu if __C.GPU.USE else 0
+__C.GPU.MULTI = lambda: num_gpu > 1 if __C.GPU.USE else 0
 __C.DEVICE = lambda: 'cuda' if __C.GPU.USE else 'cpu'
 
 ######################
@@ -45,7 +46,8 @@ __C.TRAIN.LOG_INTERVAL = 10
 __C.TRAIN.OPTIMIZER = AttrDict()
 __C.TRAIN.OPTIMIZER.MODEL = 'sgd'
 __C.TRAIN.OPTIMIZER.LR = 0.01
-__C.TRAIN.OPTIMIZER.MOMENTUM = 0.5
+__C.TRAIN.OPTIMIZER.MOMENTUM = 0.9
+__C.TRAIN.OPTIMIZER.WEIGHT_DECAY= 0.01
 
 __C.TEST = AttrDict()
 __C.TEST.BATCH_SIZE = 16
