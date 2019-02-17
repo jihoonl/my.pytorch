@@ -17,7 +17,6 @@ class AttrDict(dict):
             return self.__dict__[name]
         elif name in self:
             if callable(self[name]):
-                print("NAME: {}".format(name))
                 return self[name]()  # To support generatable configuration
             else:
                 return self[name]
