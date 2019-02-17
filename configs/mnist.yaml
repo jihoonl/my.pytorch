@@ -3,3 +3,6 @@
 DATASET:
   PREFIX: 'mnist'
 
+TRAIN:
+  EPOCH: 10
+  BATCH_SIZE: 128
