@@ -1,27 +1,26 @@
 import torch
 import torch.nn.functional as F
 
-from mytorch.utils.logger import logger
-from mytorch.utils.config import cfg
-from mytorch.data import loader
-from mytorch.model.mnist_base import MnistBaseNet
-from mytorch.optimizer import get_optimizer
-from mytorch.utils.timer import Timer
+from .utils.logger import logger
+from .utils.config import cfg
+from .data import loader
+from .model import create_model, get_trainable_params
+from .optimizer import get_optimizer
+from .utils.timer import Timer
+from .utils.export import export
 
 
 def train_model(data):
-
     device = cfg.DEVICE
     epoch = cfg.TRAIN.EPOCH
+    multi_gpu = cfg.GPU.MULTI
     train_loader = loader.train(data['train'])
     test_loader = loader.test(data['test'])
-    model = MnistBaseNet((28, 28))
-    opt = get_optimizer(model.parameters())
+    model = create_model(model_config=cfg.TRAIN.MODEL, multi_gpu=multi_gpu)
 
-    if cfg.GPU.MULTI:
-        model = torch.nn.DataParallel(model)
+    trainable_params = get_trainable_params(model, multi_gpu)
+    opt = get_optimizer(trainable_params)
     model.to(device)
-    logger.info(opt)
 
     t = Timer()
     for e in range(1, epoch + 1):
@@ -31,12 +30,15 @@ def train_model(data):
         elapse = t.toc()
         train_loss, train_accuracy = test(model, train_loader, device)
         test_loss, test_accuracy = test(model, test_loader, device)
-        logger.info('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
-                    '(Train, Test) '
-                    'Loss: {:.6f} - {:.6f}, '
-                    'Acc: {:.4f} - {:.4f}'.format(
-                        e, epoch, elapse, lr, train_loss, test_loss,
-                        train_accuracy, test_accuracy))
+        log = '[{:2}/{:2}][{:.3f}s][{:.6f}] - '
+              '(Train, Test) '
+              'Loss: {:.6f} - {:.6f}, '
+              'Acc: {:.4f} - {:.4f}'.format(
+                  e, epoch, elapse, lr, train_loss, test_loss,
+                  train_accuracy, test_accuracy)
+        logger.info(log)
+    export(model, log)
+
 
 
 def train(model, dataloader, device, optimizer):
@@ -48,6 +50,8 @@ def train(model, dataloader, device, optimizer):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+
+
 
 
 def test(model, dataloader, device):

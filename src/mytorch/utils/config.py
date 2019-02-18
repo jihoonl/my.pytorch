@@ -41,13 +41,31 @@ __C.DATASET.NUM_WORKERS = num_gpu * 4  # Advice from pytorch forum
 __C.TRAIN = AttrDict()
 __C.TRAIN.BATCH_SIZE = 16
 __C.TRAIN.EPOCH = 10
-__C.TRAIN.LOG_INTERVAL = 10
 
 __C.TRAIN.OPTIMIZER = AttrDict()
 __C.TRAIN.OPTIMIZER.MODEL = 'sgd'
-__C.TRAIN.OPTIMIZER.LR = 0.01
-__C.TRAIN.OPTIMIZER.MOMENTUM = 0.9
-__C.TRAIN.OPTIMIZER.WEIGHT_DECAY= 0.01
+__C.TRAIN.OPTIMIZER.PARAM = AttrDict()
+__C.TRAIN.OPTIMIZER.PARAM.lr = 0.01
+__C.TRAIN.OPTIMIZER.PARAM.momentum = 0.9
+__C.TRAIN.OPTIMIZER.PARAM.weight_decay = 0.01
+__C.TRAIN.OPTIMIZER.PARAM.nesterov = True
+
+__C.TRAIN.MODEL = AttrDict()
+__C.TRAIN.MODEL.NAME = 'mytorch.model.mnist_base.MnistBaseNet'
+__C.TRAIN.MODEL.PARAM = {'img_size': (28, 28)}
+
+__C.EXP = AttrDict()
+
+EXP_CLOUD_ROOT = '/data/private/exp'
+EXP_INPLACE_ROOT = '../../exp'
+EXP_ROOT = EXP_CLOUD_ROOT if EXP_CLOUD_ROOT and os.path.exists(
+    EXP_CLOUD_ROOT) else EXP_INPLACE_ROOT
+
+__C.EXP = AttrDict()
+__C.EXP.PREFIX = lambda: __C.DATASET.PREFIX
+__C.EXP.PATH = lambda: os.path.join(EXP_ROOT, __C.EXP.PREFIX)
+
+__C.LOG_DIR = lambda: __C.EXP_DIR
 
 __C.TEST = AttrDict()
 __C.TEST.BATCH_SIZE = 16
