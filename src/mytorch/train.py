@@ -1,3 +1,5 @@
+import time
+
 import torch
 import torch.nn.functional as F
 
@@ -7,10 +9,12 @@ from .data import loader
 from .model import create_model, get_trainable_params
 from .optimizer import get_optimizer
 from .utils.timer import Timer
-from .utils.export import export
+from .utils.fileio import export
 
 
 def train_model(data):
+    train_start_time = time.strftime("%b%d-%H%M")
+
     device = cfg.DEVICE
     epoch = cfg.TRAIN.EPOCH
     multi_gpu = cfg.GPU.MULTI
@@ -23,6 +27,7 @@ def train_model(data):
     model.to(device)
 
     t = Timer()
+    l = None
     for e in range(1, epoch + 1):
         t.tic()
         train(model, train_loader, device, opt)
@@ -30,15 +35,15 @@ def train_model(data):
         elapse = t.toc()
         train_loss, train_accuracy = test(model, train_loader, device)
         test_loss, test_accuracy = test(model, test_loader, device)
-        log = '[{:2}/{:2}][{:.3f}s][{:.6f}] - '
-              '(Train, Test) '
-              'Loss: {:.6f} - {:.6f}, '
-              'Acc: {:.4f} - {:.4f}'.format(
-                  e, epoch, elapse, lr, train_loss, test_loss,
-                  train_accuracy, test_accuracy)
+        l = '{:>10.6f}, {:>10.4f}, {:>10.6f}, {:>10.4f}'.format(test_loss, test_accuracy, train_loss, train_accuracy)
+        log = ('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
+               '(Train, Test) '
+               'Loss: {:.6f} - {:.6f}, '
+               'Acc: {:.4f} - {:.4f}').format(e, epoch, elapse, lr, train_loss,
+                                              test_loss, train_accuracy,
+                                              test_accuracy)
         logger.info(log)
-    export(model, log)
-
+    export(model, l, multi_gpu,  train_start_time)
 
 
 def train(model, dataloader, device, optimizer):
@@ -50,8 +55,6 @@ def train(model, dataloader, device, optimizer):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-
-
 
 
 def test(model, dataloader, device):

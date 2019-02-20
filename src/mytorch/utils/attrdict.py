@@ -1,9 +1,9 @@
 
 from ast import literal_eval
+import yaml
 import numpy as np
 
 class AttrDict(dict):
-
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]
@@ -26,6 +26,16 @@ class AttrDict(dict):
         options in b whenever they are also specified in a. update_cfg()
         """
         _merge_a_into_b(other, self, stack)
+
+    def dump(self, fp):
+        def representer(dumper, data):
+            dicted_data = {}
+            for k, v in data.items():
+                dicted_data[k] = v() if callable(v) else v
+            node = dumper.represent_data(dicted_data)
+            return node
+        yaml.add_representer(AttrDict, representer)
+        yaml.dump(self, fp)
 
 
 def _merge_a_into_b(a, b, stack=None):

@@ -65,7 +65,7 @@ __C.EXP = AttrDict()
 __C.EXP.PREFIX = lambda: __C.DATASET.PREFIX
 __C.EXP.PATH = lambda: os.path.join(EXP_ROOT, __C.EXP.PREFIX)
 
-__C.LOG_DIR = lambda: __C.EXP_DIR
+__C.LOG_DIR = lambda: __C.EXP.PATH
 
 __C.TEST = AttrDict()
 __C.TEST.BATCH_SIZE = 16
