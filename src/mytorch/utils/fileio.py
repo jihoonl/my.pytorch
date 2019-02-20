@@ -4,6 +4,7 @@ import yaml
 
 from .logger import logger
 from .config import cfg
+from .leaderboard import Leaderboard
 
 CHECKPOINT = 'checkpoint.txt'
 CONFIG_NAME = 'config.yaml'
@@ -23,6 +24,15 @@ def export(model, log, multi_gpu, time, epoch=None):
     _export_config(dirpath, cfg)
     logger.info('Exported to {}'.format(dirpath))
 
+    lbdirpath = cfg.EXP.LEADERBOARD.PATH
+    datapath = os.path.relpath(os.path.join(dirpath, filename), lbdirpath)
+    if not os.path.exists(lbdirpath):
+        os.makedirs(lbdirpath)
+
+    board = Leaderboard(lbdirpath)
+    board.add(datapath, log)
+    board.save(CONFIG_NAME)
+
 
 def _export_model(model, multi_gpu, dirpath, filename, epoch):
     filepath = os.path.join(dirpath, filename)
@@ -37,9 +47,9 @@ def _export_checkpoint(dirpath, filename, log):
     if not os.path.exists(cppath):
         with open(cppath, 'w') as f:
             print(
-                '{:>10s} {:>10s} {:>10s} {:>10s} {:>10s}'.format(
-                    '#File,', 'Test Loss,', 'Test Acc,', 'Train Loss,',
-                    'Train Acc,'),
+                '#{:>9s} {:>10s} {:>10s} {:>10s} {:>10s}'.format(
+                    'File,', 'Test Acc,', 'Test Loss,', 'Train Acc,',
+                    'Train Loss,'),
                 file=f)
     with open(os.path.join(cppath), 'a') as f:
         print('{}, {}'.format(filename, log), file=f)

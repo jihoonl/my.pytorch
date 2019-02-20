@@ -35,7 +35,7 @@ def train_model(data):
         elapse = t.toc()
         train_loss, train_accuracy = test(model, train_loader, device)
         test_loss, test_accuracy = test(model, test_loader, device)
-        l = '{:>10.6f}, {:>10.4f}, {:>10.6f}, {:>10.4f}'.format(test_loss, test_accuracy, train_loss, train_accuracy)
+        l = '{:>10.4f}, {:>10.6f}, {:>10.4f}, {:>10.6f}'.format(test_accuracy, test_loss, train_accuracy, train_loss)
         log = ('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
                '(Train, Test) '
                'Loss: {:.6f} - {:.6f}, '

@@ -64,6 +64,12 @@ EXP_ROOT = EXP_CLOUD_ROOT if EXP_CLOUD_ROOT and os.path.exists(
 __C.EXP = AttrDict()
 __C.EXP.PREFIX = lambda: __C.DATASET.PREFIX
 __C.EXP.PATH = lambda: os.path.join(EXP_ROOT, __C.EXP.PREFIX)
+__C.EXP.LEADERBOARD = AttrDict()
+__C.EXP.LEADERBOARD.PREFIX = 'leaderboard'
+__C.EXP.LEADERBOARD.PATH = lambda: os.path.join(__C.EXP.PATH, __C.EXP.LEADERBOARD.PREFIX)
+__C.EXP.LEADERBOARD.MAX = 5
+__C.EXP.LEADERBOARD.TOP1_CHECKPOINT = 'top.pth'
+__C.EXP.LEADERBOARD.TOP1_CONFIG = 'config.yaml'
 
 __C.LOG_DIR = lambda: __C.EXP.PATH
 
