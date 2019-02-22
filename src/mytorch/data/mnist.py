@@ -11,13 +11,10 @@ preprocess = transforms.Compose(
      transforms.Normalize((0.5,), (1.0,))])
 
 
-def mnist(path=None):
+def mnist():
     global dataset
 
-    if not path:
-        datapath = cfg.DATASET.PATH
-    else:
-        datapath = path
+    datapath = cfg.DATASET.PATH
     logger.debug('Loading MNIST into {}'.format(datapath))
 
     dataset['train'] = datasets.MNIST(

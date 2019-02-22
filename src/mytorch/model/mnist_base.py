@@ -1,11 +1,12 @@
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
+
 from ..utils import modules as M
 
 
 class MnistBaseNet(nn.Module):
 
-    def __init__(self, img_size):
+    def __init__(self, param):
         super(MnistBaseNet, self).__init__()
         """
         Conv1 -> Relu -> MaxPool2D -> Relu -> MaxPool2D -> FC -> Relu -> FC
@@ -13,7 +14,7 @@ class MnistBaseNet(nn.Module):
 
         # [28 x 28]
         size, self._conv1 = M.Conv2d(
-            img_size,
+            param.IN_SIZE,
             in_channels=1,
             out_channels=20,
             kernel_size=5,
@@ -25,9 +26,11 @@ class MnistBaseNet(nn.Module):
             size, in_channels=20, out_channels=50, kernel_size=5, stride=1)
         size, self._relu2 = M.ReLU(size, inplace=True)
         size, self._max_pool2d2 = M.MaxPool2d(size, kernel_size=2, stride=2)
-        size, self._fc1 = M.Linear(size, in_features=size[0] * size[1] * 50, out_features=500)
+        size, self._fc1 = M.Linear(
+            size, in_features=size[0] * size[1] * 50, out_features=500)
         size, self._relu3 = M.ReLU(size, inplace=True)
-        size, self._fc2 = M.Linear(size, in_features=500, out_features=10)
+        size, self._fc2 = M.Linear(
+            size, in_features=500, out_features=param.OUT_SIZE)
 
     def forward(self, x):
         x = self._conv1(x)

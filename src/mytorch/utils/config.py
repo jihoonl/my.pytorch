@@ -36,6 +36,9 @@ DATA_ROOT = CLOUD_ROOT if CLOUD_ROOT and os.path.exists(
 __C.DATASET = AttrDict()
 __C.DATASET.PREFIX = ''
 __C.DATASET.PATH = lambda: os.path.join(DATA_ROOT, __C.DATASET.PREFIX)
+__C.DATASET.MODULE = ''
+__C.DATASET.IN_SIZE = None
+__C.DATASET.OUT_SIZE = None
 __C.DATASET.NUM_WORKERS = num_gpu * 4  # Advice from pytorch forum
 
 __C.TRAIN = AttrDict()
@@ -52,7 +55,9 @@ __C.TRAIN.OPTIMIZER.PARAM.nesterov = True
 
 __C.TRAIN.MODEL = AttrDict()
 __C.TRAIN.MODEL.NAME = 'mytorch.model.mnist_base.MnistBaseNet'
-__C.TRAIN.MODEL.PARAM = {'img_size': (28, 28)}
+__C.TRAIN.MODEL.PARAM = AttrDict()
+__C.TRAIN.MODEL.PARAM.IN_SIZE = lambda: __C.DATASET.IN_SIZE
+__C.TRAIN.MODEL.PARAM.OUT_SIZE = lambda: __C.DATASET.OUT_SIZE
 
 __C.EXP = AttrDict()
 

@@ -2,6 +2,9 @@
 
 DATASET:
   PREFIX: 'mnist'
+  MODULE: 'mytorch.data.mnist.mnist'
+  IN_SIZE: (28, 28)
+  OUT_SIZE: 10
 
 TRAIN:
   EPOCH: 10

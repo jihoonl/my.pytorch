@@ -32,16 +32,14 @@ def main():
         set_debug(True)
 
     if args.config:
-        logger.info('Loading data from {}'.format(args.config))
+        logger.info('Loading config from {}'.format(args.config))
         cfg_from_file(args.config)
 
     logger.info("Use GPU      : {}".format(cfg.GPU.USE))
     logger.info("Number of GPU: {}".format(cfg.GPU.NUM))
     logger.info("Device       : {}".format(cfg.DEVICE))
 
-    data = mnist()
-
-    train_model(data)
+    train_model()
 
 
 if __name__ == '__main__':
