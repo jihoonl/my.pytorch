@@ -19,6 +19,7 @@ def create_model(model_config, multi_gpu=False):
     if multi_gpu:
         logger.info('Multi GPU Mode. Wrap the model with DataParallel')
         model = DataParallel(model)
+    logger.debug(model)
     return model
 
 

@@ -8,7 +8,9 @@ DATASET:
 
 TRAIN:
   MODEL:
-    NAME: 'mytorch.model.cnn.FullyConnectedNet'
+    NAME: 'mytorch.model.fc.FullyConnectedNet'
+    PARAM:
+      EXTRA: [{'LAYER': [512, 1024]}]
 
   EPOCH: 10
   BATCH_SIZE: 512
