@@ -2,10 +2,10 @@
 
 import argparse
 
-from mytorch.utils.logger import set_debug, logger
-from mytorch.utils.config import cfg_from_file, cfg
 from mytorch.data.mnist import mnist
 from mytorch.train import train_model
+from mytorch.utils.config import cfg, cfg_from_file
+from mytorch.utils.logger import logger, set_debug
 
 
 def parse_args():
