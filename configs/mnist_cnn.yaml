@@ -7,6 +7,9 @@ DATASET:
   OUT_SIZE: 10
 
 TRAIN:
+  MODEL:
+    NAME: 'mytorch.model.mnist_base.MnistBaseNet'
+
   EPOCH: 10
   BATCH_SIZE: 512
   OPTIMIZER:

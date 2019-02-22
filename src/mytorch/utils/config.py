@@ -54,7 +54,7 @@ __C.TRAIN.OPTIMIZER.PARAM.weight_decay = 0.01
 __C.TRAIN.OPTIMIZER.PARAM.nesterov = True
 
 __C.TRAIN.MODEL = AttrDict()
-__C.TRAIN.MODEL.NAME = 'mytorch.model.mnist_base.MnistBaseNet'
+__C.TRAIN.MODEL.NAME = ''
 __C.TRAIN.MODEL.PARAM = AttrDict()
 __C.TRAIN.MODEL.PARAM.IN_SIZE = lambda: __C.DATASET.IN_SIZE
 __C.TRAIN.MODEL.PARAM.OUT_SIZE = lambda: __C.DATASET.OUT_SIZE
