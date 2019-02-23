@@ -29,3 +29,6 @@ def ReLU(input_size, *args, **kwargs):
 
 def Linear(input_size, *args, **kwargs):
     return input_size, nn.Linear(*args, **kwargs)
+
+def BatchNorm2d(input_size, *args, **kwargs):
+    return input_size, nn.BatchNorm2d(*args, **kwargs)

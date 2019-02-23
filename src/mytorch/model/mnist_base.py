@@ -18,12 +18,16 @@ class MnistBaseNet(nn.Module):
             in_channels=1,
             out_channels=20,
             kernel_size=5,
-            stride=1)
+            stride=1,
+            bias=False
+        )
+        size, self._bn1 = M.BatchNorm2d(size, 20)
         size, self._relu1 = M.ReLU(size, inplace=True)
 
         size, self._max_pool2d1 = M.MaxPool2d(size, kernel_size=2, stride=2)
         size, self._conv2 = M.Conv2d(
-            size, in_channels=20, out_channels=50, kernel_size=5, stride=1)
+            size, in_channels=20, out_channels=50, kernel_size=5, stride=1, bias=False)
+        size, self._bn2 = M.BatchNorm2d(size, 50)
         size, self._relu2 = M.ReLU(size, inplace=True)
         size, self._max_pool2d2 = M.MaxPool2d(size, kernel_size=2, stride=2)
         size, self._fc1 = M.Linear(
@@ -34,9 +38,11 @@ class MnistBaseNet(nn.Module):
 
     def forward(self, x):
         x = self._conv1(x)
+        x = self._bn1(x)
         x = self._relu1(x)
         x = self._max_pool2d1(x)
         x = self._conv2(x)
+        x = self._bn2(x)
         x = self._relu2(x)
         x = self._max_pool2d2(x)
         x = x.view(-1, 4 * 4 * 50)
