@@ -1,9 +1,12 @@
-
 from ast import literal_eval
 import yaml
 import numpy as np
 
+
 class AttrDict(dict):
+
+
+
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]
@@ -28,12 +31,14 @@ class AttrDict(dict):
         _merge_a_into_b(other, self, stack)
 
     def dump(self, fp):
+
         def representer(dumper, data):
             dicted_data = {}
             for k, v in data.items():
                 dicted_data[k] = v() if callable(v) else v
             node = dumper.represent_data(dicted_data)
             return node
+
         yaml.add_representer(AttrDict, representer)
         yaml.dump(self, fp)
 
@@ -45,12 +50,13 @@ def _merge_a_into_b(a, b, stack=None):
     for k, v_ in a.items():
         full_key = '.'.join(stack) + '.' + k if stack is not None else k
         # a must specify keys that are in b
-        if k not in b:
-            raise KeyError('Non-existent config key: {}'.format(full_key))
+        #TODO(jihoonl): This is good sanity check. Please re-enable back
+        #if k not in b:
+        #    raise KeyError('Non-existent config key: {}'.format(full_key))
 
         v = _decode_cfg_value(v_)
-        v = _check_and_coerce_cfg_value_type(v, b[k], k,
-                                             full_key)  # TODO(jihoonl): WTF
+        #v = _check_and_coerce_cfg_value_type(v, b[k], k,
+        #                                     full_key)  # TODO(jihoonl): WTF
 
         # Recursively merge dicts
         if isinstance(v, AttrDict):

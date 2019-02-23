@@ -10,7 +10,7 @@ TRAIN:
   MODEL:
     NAME: 'mytorch.model.fc.FullyConnectedNet'
     PARAM:
-      EXTRA: [{'LAYER': [512, 1024]}]
+      LAYER: [512, 1024]
 
   EPOCH: 10
   BATCH_SIZE: 512

@@ -24,8 +24,8 @@ class FullyConnectedNet(nn.Module):
         prev_dim = flatten
         size = param.IN_SIZE
 
-        if param.EXTRA:
-            p_layer = param.EXTRA[0]['LAYER']
+        if 'LAYER' in param:
+            p_layer = param.LAYER
             for dim in p_layer:
                 size, l = add_layer(size, prev_dim, dim)
                 prev_dim = dim
@@ -38,4 +38,4 @@ class FullyConnectedNet(nn.Module):
         x = x.view(x.shape[0], -1)
         for layer in self.layer:
             x = layer(x)
-        return F.log_softmax(x, dim=1)
+        return x

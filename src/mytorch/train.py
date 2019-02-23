@@ -3,13 +3,13 @@ import time
 import torch
 import torch.nn.functional as F
 
-from .utils.logger import logger
-from .utils.config import cfg
-from .data import loader, get_dataset
+from .data import get_dataset, loader
 from .model import create_model, get_trainable_params
 from .optimizer import get_optimizer
-from .utils.timer import Timer
+from .utils.config import cfg
 from .utils.fileio import export
+from .utils.logger import logger
+from .utils.timer import Timer
 
 
 def train_model():
@@ -56,6 +56,7 @@ def train(model, dataloader, device, optimizer):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
+        output = F.log_softmax(output, dim=1)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -70,6 +71,7 @@ def test(model, dataloader, device):
         for data, target in dataloader:
             data, target = data.to(device), target.to(device)
             output = model(data)
+            output = F.log_softmax(output, dim=1)
             test_loss += F.nll_loss(output, target, reduction='sum').item()
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()

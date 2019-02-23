@@ -43,4 +43,4 @@ class MnistBaseNet(nn.Module):
         x = self._fc1(x)
         x = self._relu3(x)
         x = self._fc2(x)
-        return F.log_softmax(x, dim=1)
+        return x
