@@ -23,7 +23,7 @@ def train_model():
 
     train_loader = loader.train(data['train'])
     test_loader = loader.test(data['test'])
-    model = create_model(model_config=cfg.TRAIN.MODEL, multi_gpu=multi_gpu)
+    model = create_model(model_config=cfg.MODEL, multi_gpu=multi_gpu)
 
     trainable_params = get_trainable_params(model, multi_gpu)
     opt = get_optimizer(trainable_params)

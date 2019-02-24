@@ -6,12 +6,12 @@ DATASET:
   IN_SIZE: (28, 28)
   OUT_SIZE: 10
 
-TRAIN:
-  MODEL:
-    NAME: 'mytorch.model.fc.FullyConnectedNet'
-    PARAM:
-      LAYER: [512, 1024]
+MODEL:
+  NAME: 'mytorch.model.fc.FullyConnectedNet'
+  PARAM:
+    LAYER: [512, 1024]
 
+TRAIN:
   EPOCH: 10
   BATCH_SIZE: 512
   OPTIMIZER:

@@ -7,12 +7,13 @@ DATASET:
   IN_SIZE: (28, 28)
   OUT_SIZE: 10
 
-TRAIN:
-  MODEL:
-    NAME: 'mytorch.model.resnet.ResNet18'
-    PARAM:
-      INPUT_DEPTH: 1
+MODEL:
+  NAME: 'mytorch.model.resnet.ResNet18'
+  PARAM:
+    INPUT_DEPTH: 1
 
+
+TRAIN:
   EPOCH: 10
   BATCH_SIZE: 256
   OPTIMIZER:
