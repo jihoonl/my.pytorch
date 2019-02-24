@@ -1,17 +1,19 @@
+import types
 from ast import literal_eval
-import yaml
+
 import numpy as np
+import yaml
 
 
 class AttrDict(dict):
-
-
 
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]
         elif name in self:
-            if callable(self[name]):
+            if isinstance(self[name], type):
+                return self[name]
+            elif callable(self[name]):
                 return self[name]()  # To support generatable configuration
             else:
                 return self[name]
@@ -35,7 +37,12 @@ class AttrDict(dict):
         def representer(dumper, data):
             dicted_data = {}
             for k, v in data.items():
-                dicted_data[k] = v() if callable(v) else v
+                if isinstance(v, type):
+                    dicted_data[k] = '{}.{}'.format(v.__module__, v.__name__)
+                elif callable(v):
+                    dicted_data[k] = v()
+                else:
+                    dicted_data[k] = v
             node = dumper.represent_data(dicted_data)
             return node
 
