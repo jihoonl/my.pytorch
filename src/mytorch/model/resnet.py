@@ -107,10 +107,10 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
 
         layers = param.LAYER
-        first = param.INPUT_DEPTH
         self.inplane = layers[0][0]
 
-        size = param.IN_SIZE
+        w, h, first = param.IN_SIZE
+        size = (w, h)
         outsize = param.OUT_SIZE
         block = param.BLOCK
         if isinstance(block, str):

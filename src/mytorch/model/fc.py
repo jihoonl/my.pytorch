@@ -22,7 +22,8 @@ class FullyConnectedNet(nn.Module):
 
         layer = []
         prev_dim = flatten
-        size = param.IN_SIZE
+        w, h, d = param.IN_SIZE
+        size = (w, h)
 
         if 'LAYER' in param:
             p_layer = param.LAYER

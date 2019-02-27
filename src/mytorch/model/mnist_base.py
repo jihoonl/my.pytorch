@@ -11,11 +11,12 @@ class MnistBaseNet(nn.Module):
         """
         Conv1 -> Relu -> MaxPool2D -> Relu -> MaxPool2D -> FC -> Relu -> FC
         """
+        w, h, d = param.IN_SIZE
 
         # [28 x 28]
         size, self._conv1 = M.Conv2d(
-            param.IN_SIZE,
-            in_channels=1,
+            (w, h),
+            in_channels=d,
             out_channels=20,
             kernel_size=5,
             stride=1,
