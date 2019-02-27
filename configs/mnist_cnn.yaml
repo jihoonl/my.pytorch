@@ -1,14 +1,8 @@
 # MNIST dataset
 
-DATASET:
-  PREFIX: 'mnist'
-  MODULE: 'mytorch.data.mnist.mnist'
-  PREPROCESS: 'mytorch.preprocess.mnist'
-  IN_SIZE: (28, 28, 1)
-  OUT_SIZE: 10
+DATASET: !include dataset/mnist.yaml
 
-MODEL:
-  NAME: 'mytorch.model.mnist_base.MnistBaseNet'
+MODEL: !include model/mnist_base.yaml
 
 TRAIN:
   EPOCH: 10

@@ -2,6 +2,7 @@ import os
 import torch
 
 from .attrdict import AttrDict
+from .yaml_loader import YAMLLoader
 """
 Global configuration
 
@@ -90,6 +91,6 @@ def cfg_from_file(filename):
     """Load a config file and merge it into the default options."""
     import yaml
     with open(filename, 'r') as f:
-        yaml_cfg = AttrDict(yaml.load(f))
+        yaml_cfg = AttrDict(yaml.load(f, YAMLLoader))
 
     __C.merge(yaml_cfg)

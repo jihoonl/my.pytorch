@@ -1,16 +1,7 @@
 # MNIST dataset
 
-DATASET:
-  PREFIX: 'mnist'
-  MODULE: 'mytorch.data.mnist.mnist'
-  PREPROCESS: 'mytorch.preprocess.mnist'
-  IN_SIZE: (28, 28, 1)
-  OUT_SIZE: 10
-
-MODEL:
-  NAME: 'mytorch.model.fc.FullyConnectedNet'
-  PARAM:
-    LAYER: [512, 1024]
+DATASET: !include dataset/mnist.yaml
+MODEL: !include model/fc.yaml
 
 TRAIN:
   EPOCH: 10

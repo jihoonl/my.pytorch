@@ -1,0 +1,3 @@
+NAME: 'mytorch.model.fc.FullyConnectedNet'
+PARAM:
+  LAYER: [512, 1024]
