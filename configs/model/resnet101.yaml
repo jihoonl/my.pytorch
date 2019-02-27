@@ -1,0 +1,6 @@
+NAME: 'mytorch.model.resnet.ResNet101'
+
+# NAME: 'mytorch.model.resnet.ResNet'
+# PARAM:
+#   BLOCK: 'mytorch.model.resnet.BottleNeck'
+#   LAYER: [(64, 3, 1), (128, 4, 2), (256, 23, 2), (512, 3, 2)]
