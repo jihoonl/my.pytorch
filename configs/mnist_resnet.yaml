@@ -4,7 +4,7 @@
 DATASET:
   PREFIX: 'mnist'
   MODULE: 'mytorch.data.mnist.mnist'
-  PREPROCESS: 'mytorch.data.mnist.preprocess'
+  PREPROCESS: 'mytorch.preprocess.mnist'
   IN_SIZE: (28, 28)
   OUT_SIZE: 10
 

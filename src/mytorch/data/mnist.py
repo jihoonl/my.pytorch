@@ -1,14 +1,10 @@
 import os
-from torchvision import datasets, transforms
+from torchvision import datasets
 
 from ..utils.importer import import_method
 from ..utils.logger import logger
 
 dataset = {'train': None, 'test': None}
-
-preprocess = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.5,), (1.0,))])
 
 
 def mnist(cfg):
