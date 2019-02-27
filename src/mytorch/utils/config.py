@@ -78,6 +78,10 @@ __C.EXP.LEADERBOARD.TOP1_CONFIG = 'config.yaml'
 
 __C.LOG_DIR = lambda: __C.EXP.PATH
 
+__C.RESUME = AttrDict()
+__C.RESUME.CHECKPOINT = ''
+__C.RESUME.SCOPE = ''
+
 __C.TEST = AttrDict()
 __C.TEST.BATCH_SIZE = 16
 

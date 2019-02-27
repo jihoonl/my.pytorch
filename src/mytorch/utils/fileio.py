@@ -38,7 +38,7 @@ def _export_model(model, multi_gpu, dirpath, filename, epoch):
     filepath = os.path.join(dirpath, filename)
 
     # Assume it uses data parallel if it is multi gpu
-    m = model if multi_gpu else model.module
+    m = model.module if multi_gpu else model
     torch.save(m.state_dict(), filepath)
 
 

@@ -2,9 +2,10 @@ import time
 
 import torch
 import torch.nn.functional as F
+from PIL import Image
 
-from .data import get_dataset, loader
-from .model import create_model, get_trainable_params
+from .data import get_dataset, get_preprocessed_data, loader
+from .model import load_model, get_trainable_params
 from .optimizer import get_optimizer
 from .utils.config import cfg
 from .utils.fileio import export
@@ -18,12 +19,14 @@ def train_model():
     device = cfg.DEVICE
     epoch = cfg.TRAIN.EPOCH
     multi_gpu = cfg.GPU.MULTI
+    resume = cfg.RESUME if cfg.RESUME.CHECKPOINT else None
 
     data = get_dataset(cfg.DATASET)
 
     train_loader = loader.train(data['train'])
     test_loader = loader.test(data['test'])
-    model = create_model(model_config=cfg.MODEL, multi_gpu=multi_gpu)
+    model = load_model(
+        model_config=cfg.MODEL, resume_config=resume, multi_gpu=multi_gpu)
 
     trainable_params = get_trainable_params(model, multi_gpu)
     opt = get_optimizer(trainable_params)
@@ -79,3 +82,27 @@ def test(model, dataloader, device):
     accuracy = correct / len(dataloader.dataset)
 
     return test_loss, accuracy
+
+
+def inference_from_file(img_file):
+    img = Image.open(img_file)
+
+    device = cfg.DEVICE
+    multi_gpu = cfg.GPU.MULTI
+    resume = cfg.RESUME if cfg.RESUME.CHECKPOINT else None
+
+    if not resume:
+        raise Exception('Cannot inference if resume is None, {}'.format(cfg.RESUME))
+
+    data = get_preprocessed_data(img, cfg.DATASET)
+    model = load_model(
+        model_config=cfg.MODEL, resume_config=resume, multi_gpu=multi_gpu)
+    model.eval()
+
+    with torch.no_grad():
+        model.to(device)
+        data.to(device)
+        output = model(torch.unsqueeze(data, 0))
+        output = F.log_softmax(output, dim=1)
+        pred = output.argmax(dim=1, keepdim=True)
+    return int(pred[0])
