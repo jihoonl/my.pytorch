@@ -3,7 +3,7 @@ import os
 from .logger import logger
 
 
-class YAMLLoader(yaml.SafeLoader):
+class YAMLLoader(yaml.Loader):
 
     def __init__(self, stream):
         super(YAMLLoader, self).__init__(stream)
