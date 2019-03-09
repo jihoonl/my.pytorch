@@ -1,0 +1,5 @@
+# Step LR Scheduler
+
+MODEL: 'step'
+STEPS: [1]
+GAMMA: 0.98
