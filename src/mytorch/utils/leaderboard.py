@@ -3,6 +3,7 @@ import os
 import numpy as np
 from collections import OrderedDict
 
+from .logger import logger
 from .config import cfg
 
 
@@ -50,6 +51,10 @@ class Leaderboard(object):
         for idx in sorted_idx:
             new_board[k[idx]] = b[idx]
         self._board = new_board
+
+        k, v = next(iter(self._board.items()))
+        if k == datapath:
+            logger.info('New record! {}: {}'.format(k, v))
 
     def save(self, config_name):
         with open(self._path, 'w') as f:
