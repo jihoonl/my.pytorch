@@ -1,0 +1,8 @@
+# MNIST capsule
+
+DATASET: !include dataset/mnist.yaml
+MODEL: !include model/capsulenet.yaml
+
+TRAIN:
+  EPOCH: 10
+  BATCH_SIZE: 512
