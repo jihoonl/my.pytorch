@@ -40,17 +40,18 @@ def train_model():
     l = None
     for e in range(1, epoch + 1):
         t.tic()
-        train(model, train_loader, device, opt, e, epoch, writer)
+        train(model, train_loader, device, opt, e, epoch, writer=writer)
         lr = opt.param_groups[0]['lr']
         elapse = t.toc()
 
         if e % cfg.TRAIN.EVAL_EPOCH == 0:
             train_loss, train_accuracy = evaluate(model, train_loader, device,
-                                                  e, epoch, writer)
-            test_loss, test_accuracy = evaluate(model, test_loader, device, e,
-                                                epoch, writer)
+                                                  e, epoch, 'Eval[T]', writer)
+            eval_loss, eval_accuracy = evaluate(model, test_loader, device, e,
+                                                epoch, 'Eval[V]', writer)
             l = '{:>10.4f}, {:>10.6f}, {:>10.4f}, {:>10.6f}'.format(
-                test_accuracy, test_loss, train_accuracy, train_loss)
+                eval_accuracy, eval_loss, train_accuracy, train_loss)
+            """
             log = ('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
                    '(Train, Test) '
                    'Loss: {:.6f} - {:.6f}, '
@@ -58,16 +59,17 @@ def train_model():
                                                   train_loss, test_loss,
                                                   train_accuracy, test_accuracy)
             logger.info(log)
+            """
     export(model, l, multi_gpu, train_start_time)
 
 
-def train(model, dataloader, device, optimizer, epoch, max_epoch, writer=None):
+def train(model, dataloader, device, optimizer, epoch, max_epoch, name='Train', writer=None):
 
     model.train()
     loss_sum = 0
     loss = 0
-    loader = Progressbar(dataloader, 'Train', epoch, max_epoch)
-    for data, target in loader():
+    loader = Progressbar(dataloader, name, epoch, max_epoch)
+    for data, target in loader:
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
@@ -77,21 +79,24 @@ def train(model, dataloader, device, optimizer, epoch, max_epoch, writer=None):
         optimizer.step()
 
         loss_sum += loss
-        loader.desc('loss {:10.4f}'.format(loss))
+        desc = {
+            'Loss ':' {:5.4f}'.format(loss),
+        }
+        loader.desc(desc)
     lr = optimizer.param_groups[0]['lr']
     writer.add_scalar('Train/loss', loss_sum / len(dataloader.dataset), epoch)
     writer.add_scalar('Train/lr', lr, epoch)
 
 
-def evaluate(model, dataloader, device, epoch, max_epoch, writer=None):
+def evaluate(model, dataloader, device, epoch, max_epoch, name='Eval', writer=None):
     model.eval()
     eval_loss = 0
     correct = 0
 
     with torch.no_grad():
-        loader = Progressbar(dataloader, 'Eval', epoch, max_epoch)
+        loader = Progressbar(dataloader, name, epoch, max_epoch)
         len_data_cum = 0
-        for data, target in loader():
+        for data, target in loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
             output = F.log_softmax(output, dim=1)
@@ -100,7 +105,11 @@ def evaluate(model, dataloader, device, epoch, max_epoch, writer=None):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
             len_data_cum += len(data)
-            loader.desc('loss {:10.4f}'.format(eval_loss / len_data_cum))
+            desc = {
+                'Loss ':' {:5.4f}'.format(eval_loss/ len_data_cum),
+                'Acc  ':' {:3.4f}'.format(correct/len_data_cum)
+            }
+            loader.desc(desc)
     eval_loss /= len(dataloader.dataset)
     accuracy = correct / len(dataloader.dataset)
     writer.add_scalar('Eval/loss', eval_loss)

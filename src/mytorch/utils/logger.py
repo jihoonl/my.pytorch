@@ -26,17 +26,18 @@ def set_debug(debug=True):
 class Progressbar(object):
 
     def __init__(self, iterator, mode, epoch, max_epoch):
-        self._tqdm = tqdm(
-            iterator,
-            ncols=72,
-            bar_format='{desc}{percentage:3.0f}%|{bar}|[{elapsed}]',
-            ascii=True)
         self._mode = mode
         self._epoch_msg = '[{:3d}/{:3d}]'.format(epoch, max_epoch)
+        self._tqdm = tqdm(
+            iterator,
+            ncols=79,
+            bar_format='{desc}{percentage:3.0f}%|{bar}|[{elapsed}, {n_fmt}/{total_emt}]{postfix}',
+            desc='[INFO] {:8s} {:s}'.format(self._mode, self._epoch_msg),
+            ascii=True)
 
-    def __call__(self):
+    def __enter__(self):
         return self._tqdm
 
     def desc(self, msg):
-        self._tqdm.set_description('[INFO] {:5s} {:s} {:s} '.format(
-            self._mode, self._epoch_msg, msg))
+        #self._tqdm.set_postfix('{:s} '.format(msg))
+        self._tqdm.set_postfix(msg)
