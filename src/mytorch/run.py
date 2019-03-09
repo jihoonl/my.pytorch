@@ -32,7 +32,7 @@ def train_model():
     trainable_params = get_trainable_params(model, multi_gpu)
     opt = get_optimizer(trainable_params, cfg.TRAIN.OPTIMIZER)
     lr_scheduler = get_lr_scheduler(opt, cfg.TRAIN.LR_SCHEDULER)
-    writer = get_writer(cfg)
+    writer = get_writer(train_start_time, cfg)
 
     model.to(device)
 
