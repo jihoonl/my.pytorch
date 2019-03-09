@@ -1,6 +1,6 @@
 # my.pytorch
 
-My code base to train and test various networks
+My codebase to train and test various networks
 
 ### Mnist
 
