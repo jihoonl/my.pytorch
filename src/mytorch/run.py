@@ -69,7 +69,7 @@ def train(model, dataloader, device, optimizer, epoch, max_epoch, name='Train', 
     loss_sum = 0
     loss = 0
     loader = Progressbar(dataloader, name, epoch, max_epoch)
-    for data, target in loader:
+    for data, target in loader():
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
@@ -96,7 +96,7 @@ def evaluate(model, dataloader, device, epoch, max_epoch, name='Eval', writer=No
     with torch.no_grad():
         loader = Progressbar(dataloader, name, epoch, max_epoch)
         len_data_cum = 0
-        for data, target in loader:
+        for data, target in loader():
             data, target = data.to(device), target.to(device)
             output = model(data)
             output = F.log_softmax(output, dim=1)

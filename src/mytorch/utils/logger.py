@@ -31,13 +31,12 @@ class Progressbar(object):
         self._tqdm = tqdm(
             iterator,
             ncols=79,
-            bar_format='{desc}{percentage:3.0f}%|{bar}|[{elapsed}, {n_fmt}/{total_emt}]{postfix}',
+            bar_format='{desc}{percentage:3.0f}%|{bar}|[{elapsed}, {n_fmt}/{total_fmt}]{postfix}',
             desc='[INFO] {:8s} {:s}'.format(self._mode, self._epoch_msg),
             ascii=True)
 
-    def __enter__(self):
+    def __call__(self):
         return self._tqdm
 
     def desc(self, msg):
-        #self._tqdm.set_postfix('{:s} '.format(msg))
         self._tqdm.set_postfix(msg)
