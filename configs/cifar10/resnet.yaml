@@ -1,0 +1,15 @@
+# cifar10
+
+DATASET: !include dataset.yaml
+MODEL: !include ../model/resnet18.yaml
+
+TRAIN:
+  EPOCH: 50
+  EVAL_EPOCH: 1
+  BATCH_SIZE: 56
+  OPTIMIZER:
+    PARAM:
+      lr: 0.1
+      momentum: 0.99
+      weight_decay: 0.0001
+  LR_SCHEDULER: !include ../lr_scheduler/sgdr.yaml

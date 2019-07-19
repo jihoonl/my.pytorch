@@ -1,8 +1,8 @@
 
 # MNIST dataset
 
-DATASET: !include dataset/mnist.yaml
-MODEL: !include model/resnet18.yaml
+DATASET: !include dataset.yaml
+MODEL: !include ../model/resnet18.yaml
 
 TRAIN:
   EPOCH: 10
@@ -12,4 +12,4 @@ TRAIN:
       lr: 0.05
       momentum: 0.9
       weight_decay: 0.0001
-  LR_SCHEDULER: !include lr_scheduler/step.yaml
+  LR_SCHEDULER: !include ../lr_scheduler/step.yaml

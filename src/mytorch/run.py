@@ -26,8 +26,9 @@ def train_model():
 
     train_loader = loader.train(data['train'])
     test_loader = loader.test(data['test'])
-    model = load_model(
-        model_config=cfg.MODEL, resume_config=resume, multi_gpu=multi_gpu)
+    model = load_model(model_config=cfg.MODEL,
+                       resume_config=resume,
+                       multi_gpu=multi_gpu)
 
     trainable_params = get_trainable_params(model, multi_gpu)
     opt = get_optimizer(trainable_params, cfg.TRAIN.OPTIMIZER)
@@ -45,12 +46,18 @@ def train_model():
         elapse = t.toc()
 
         if e % cfg.TRAIN.EVAL_EPOCH == 0:
-            train_loss, train_accuracy = evaluate(model, train_loader, device,
-                                                  e, epoch, 'Eval[T]', writer)
-            eval_loss, eval_accuracy = evaluate(model, test_loader, device, e,
-                                                epoch, 'Eval[V]', writer)
-            l = '{:>10.4f}, {:>10.6f}, {:>10.4f}, {:>10.6f}'.format(
-                eval_accuracy, eval_loss, train_accuracy, train_loss)
+            if cfg.TRAIN.EVAL_TRAIN:
+                train_loss, train_accuracy = evaluate(model, train_loader,
+                                                      device, e, epoch,
+                                                      'Eval[T]', writer)
+                eval_loss, eval_accuracy = evaluate(model, test_loader, device,
+                                                    e, epoch, 'Eval[V]', writer)
+                l = '{:>10.4f}, {:>10.6f}, {:>10.4f}, {:>10.6f}'.format(
+                    eval_accuracy, eval_loss, train_accuracy, train_loss)
+            else:
+                eval_loss, eval_accuracy = evaluate(model, test_loader, device,
+                                                    e, epoch, 'Eval[V]', writer)
+                l = '{:>10.4f}, {:>10.6f}'.format(eval_accuracy, eval_loss)
             """
             log = ('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
                    '(Train, Test) '
@@ -63,7 +70,14 @@ def train_model():
     export(model, l, multi_gpu, train_start_time)
 
 
-def train(model, dataloader, device, optimizer, epoch, max_epoch, name='Train', writer=None):
+def train(model,
+          dataloader,
+          device,
+          optimizer,
+          epoch,
+          max_epoch,
+          name='Train',
+          writer=None):
 
     model.train()
     loss_sum = 0
@@ -80,7 +94,7 @@ def train(model, dataloader, device, optimizer, epoch, max_epoch, name='Train', 
 
         loss_sum += loss
         desc = {
-            'Loss ':' {:5.4f}'.format(loss),
+            'Loss ': ' {:5.4f}'.format(loss),
         }
         loader.desc(desc)
     lr = optimizer.param_groups[0]['lr']
@@ -88,7 +102,13 @@ def train(model, dataloader, device, optimizer, epoch, max_epoch, name='Train', 
     writer.add_scalar('Train/lr', lr, epoch)
 
 
-def evaluate(model, dataloader, device, epoch, max_epoch, name='Eval', writer=None):
+def evaluate(model,
+             dataloader,
+             device,
+             epoch,
+             max_epoch,
+             name='Eval',
+             writer=None):
     model.eval()
     eval_loss = 0
     correct = 0
@@ -106,8 +126,8 @@ def evaluate(model, dataloader, device, epoch, max_epoch, name='Eval', writer=No
 
             len_data_cum += len(data)
             desc = {
-                'Loss ':' {:5.4f}'.format(eval_loss/ len_data_cum),
-                'Acc  ':' {:3.4f}'.format(correct/len_data_cum)
+                'Loss ': ' {:5.4f}'.format(eval_loss / len_data_cum),
+                'Acc  ': ' {:3.4f}'.format(correct / len_data_cum)
             }
             loader.desc(desc)
     eval_loss /= len(dataloader.dataset)
@@ -130,8 +150,9 @@ def inference_from_file(img_file):
             cfg.RESUME))
 
     data = get_preprocessed_data(img, cfg.DATASET)
-    model = load_model(
-        model_config=cfg.MODEL, resume_config=resume, multi_gpu=multi_gpu)
+    model = load_model(model_config=cfg.MODEL,
+                       resume_config=resume,
+                       multi_gpu=multi_gpu)
     model.eval()
 
     with torch.no_grad():

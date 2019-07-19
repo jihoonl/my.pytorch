@@ -1,6 +1,5 @@
 
 PREFIX: 'mnist'
 MODULE: 'mytorch.data.mnist.mnist'
-PREPROCESS: 'mytorch.preprocess.mnist'
 IN_SIZE: (28, 28, 1)
 OUT_SIZE: 10

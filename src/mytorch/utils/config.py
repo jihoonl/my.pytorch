@@ -46,6 +46,7 @@ __C.TRAIN = AttrDict()
 __C.TRAIN.BATCH_SIZE = 16
 __C.TRAIN.EPOCH = 10
 __C.TRAIN.EVAL_EPOCH = lambda: int(__C.TRAIN.EPOCH / 5)
+__C.TRAIN.EVAL_TRAIN = False
 
 __C.TRAIN.OPTIMIZER = AttrDict()
 __C.TRAIN.OPTIMIZER.MODEL = 'sgd'

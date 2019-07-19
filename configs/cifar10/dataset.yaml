@@ -1,0 +1,5 @@
+
+PREFIX: 'cifar10'
+MODULE: 'mytorch.data.cifar10.cifar10'
+IN_SIZE: (32, 32, 3)
+OUT_SIZE: 10
