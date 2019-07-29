@@ -1,7 +1,3 @@
 
-NAME: 'mytorch.model.resnet.ResNet34'
+NAME: 'mytorch.model.resnet.Resnet34'
 
-# NAME: 'mytorch.model.resnet.ResNet'
-# PARAM:
-#   BLOCK: 'mytorch.model.resnet.BasicBlock'
-#   LAYER: [(64, 3, 1), (128, 4, 2), (256, 6, 2), (512, 3, 2)]

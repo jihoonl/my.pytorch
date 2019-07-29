@@ -35,16 +35,21 @@ class Leaderboard(object):
             for l in lines[1:]:
                 key, value = l.split(':')
                 splits = value.split(',')
-                board[splits[0].strip()] = [float(s) for s in splits[1:]]
+                b = np.zeros(4)
+                a = np.array([float(s) for s in splits[1:]])
+                b[:a.shape[0]] = a
+                board[splits[0].strip()] = b
         return board
 
     def add(self, datapath, log):
         board = self._board
-        new_log = [float(l) for l in log.split(',')]
+        new_log = np.zeros(4)
+        a = np.array([float(l) for l in log.split(',')])
+        new_log[:a.shape[0]] = a
         board[datapath] = new_log
 
         k = list(board.keys())
-        b = np.array(list((board.values())))
+        b = np.stack(list(board.values()))
         acc_list = b[:, 0]
         sorted_idx = np.argsort(acc_list)[::-1]
         new_board = OrderedDict()
@@ -58,17 +63,15 @@ class Leaderboard(object):
 
     def save(self, config_name):
         with open(self._path, 'w') as f:
-            print(
-                '{:6s}: {:30s}, {}'.format(
-                    '#Rank', 'Data',
-                    '  Test Acc   Test Loss   Train Acc  Train Loss'),
-                file=f)
+            print('{:6s}: {:60s}, {}'.format(
+                '#Rank', 'Data',
+                '  Test Acc   Test Loss   Train Acc  Train Loss'),
+                  file=f)
             for rank, (k, v) in enumerate(self._board.items(), 1):
-                print(
-                    '   {:3s}: {:30s}, {}'.format(
-                        str(rank), k,
-                        ', '.join(['{:>10.6f}'.format(float(vv)) for vv in v])),
-                    file=f)
+                print('   {:3s}: {:60s}, {}'.format(
+                    str(rank), k,
+                    ', '.join(['{:>10.6f}'.format(float(vv)) for vv in v])),
+                      file=f)
                 if rank > cfg.EXP.LEADERBOARD.MAX:
                     break
         k, v = next(iter(self._board.items()))

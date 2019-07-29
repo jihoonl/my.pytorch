@@ -30,7 +30,7 @@ class Progressbar(object):
         self._epoch_msg = '[{:3d}/{:3d}]'.format(epoch, max_epoch)
         self._tqdm = tqdm(
             iterator,
-            ncols=79,
+            ncols=119,
             bar_format='{desc}{percentage:3.0f}%|{bar}|[{elapsed}, {n_fmt}/{total_fmt}]{postfix}',
             desc='[INFO] {:8s} {:s}'.format(self._mode, self._epoch_msg),
             ascii=True)

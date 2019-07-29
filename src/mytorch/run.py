@@ -5,9 +5,11 @@ import torch.nn.functional as F
 from PIL import Image
 
 from .data import get_dataset, get_preprocessed_data, loader
+from .loss import get_loss
 from .model import get_trainable_params, load_model
 from .optimizer import get_lr_scheduler, get_optimizer
-from .utils.config import cfg
+from .utils import AverageMeter
+from .utils.config import cfg, get_logdir_name
 from .utils.fileio import export
 from .utils.logger import Progressbar, logger
 from .utils.tensorboard import get_writer
@@ -33,30 +35,40 @@ def train_model():
     trainable_params = get_trainable_params(model, multi_gpu)
     opt = get_optimizer(trainable_params, cfg.TRAIN.OPTIMIZER)
     lr_scheduler = get_lr_scheduler(opt, cfg.TRAIN.LR_SCHEDULER)
-    writer = get_writer(train_start_time, cfg)
+    criterion = get_loss()
+    writer = get_writer(train_start_time)
+    logger.info('Log Dir: {}'.format(get_logdir_name(train_start_time)))
 
     model.to(device)
+    criterion.to(device)
 
-    t = Timer()
     l = None
     for e in range(1, epoch + 1):
-        t.tic()
-        train(model, train_loader, device, opt, e, epoch, writer=writer)
-        lr = opt.param_groups[0]['lr']
-        elapse = t.toc()
+        lr_scheduler.step(epoch)
+        train(model,
+              train_loader,
+              device,
+              opt,
+              criterion,
+              lr_scheduler,
+              e,
+              epoch,
+              writer=writer)
 
         if e % cfg.TRAIN.EVAL_EPOCH == 0:
             if cfg.TRAIN.EVAL_TRAIN:
                 train_loss, train_accuracy = evaluate(model, train_loader,
-                                                      device, e, epoch,
-                                                      'Eval[T]', writer)
-                eval_loss, eval_accuracy = evaluate(model, test_loader, device,
-                                                    e, epoch, 'Eval[V]', writer)
+                                                      criterion, device, e,
+                                                      epoch, 'Eval[T]', writer)
+                eval_loss, eval_accuracy = evaluate(model, test_loader,
+                                                    criterion, device, e, epoch,
+                                                    'Eval[V]', writer)
                 l = '{:>10.4f}, {:>10.6f}, {:>10.4f}, {:>10.6f}'.format(
                     eval_accuracy, eval_loss, train_accuracy, train_loss)
             else:
-                eval_loss, eval_accuracy = evaluate(model, test_loader, device,
-                                                    e, epoch, 'Eval[V]', writer)
+                eval_loss, eval_accuracy = evaluate(model, test_loader,
+                                                    criterion, device, e, epoch,
+                                                    'Eval[V]', writer)
                 l = '{:>10.4f}, {:>10.6f}'.format(eval_accuracy, eval_loss)
             """
             log = ('[{:2}/{:2}][{:.3f}s][{:.6f}] - '
@@ -68,49 +80,61 @@ def train_model():
             logger.info(log)
             """
     export(model, l, multi_gpu, train_start_time)
+    writer.close()
 
 
 def train(model,
           dataloader,
           device,
           optimizer,
+          criterion,
+          lr_scheduler,
           epoch,
           max_epoch,
           name='Train',
           writer=None):
+    losses = AverageMeter('Loss', ':.4e')
 
     model.train()
-    loss_sum = 0
-    loss = 0
     loader = Progressbar(dataloader, name, epoch, max_epoch)
-    for data, target in loader():
+    for i, (data, target) in enumerate(loader()):
+        #lr_scheduler.step_iter(i * epoch)
         data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
         output = model(data)
-        output = F.log_softmax(output, dim=1)
-        loss = F.nll_loss(output, target)
+        loss = criterion(output, target)
+        losses.update(loss.item(), data.size(0))
+
+        optimizer.zero_grad()
         loss.backward()
+        if cfg.TRAIN.OPTIMIZER_CLIP.enabled:
+            clip_grad(model.parameters(), cfg.TRAIN.OPTIMIZER_CLIP.config)
         optimizer.step()
 
-        loss_sum += loss
         desc = {
             'Loss ': ' {:5.4f}'.format(loss),
         }
         loader.desc(desc)
     lr = optimizer.param_groups[0]['lr']
-    writer.add_scalar('Train/loss', loss_sum / len(dataloader.dataset), epoch)
+    writer.add_scalar('Train/loss', losses.avg, epoch)
     writer.add_scalar('Train/lr', lr, epoch)
+
+
+def clip_grad(params, grad_clip):
+    torch.nn.utils.clip_grad.clip_grad_norm_(
+        filter(lambda p: p.requires_grad, params), **grad_clip)
 
 
 def evaluate(model,
              dataloader,
+             criterion,
              device,
              epoch,
              max_epoch,
              name='Eval',
              writer=None):
     model.eval()
-    eval_loss = 0
+    losses = AverageMeter('Loss', ':5.4f')
+    accuracy = AverageMeter('Acc', ':3.4f')
     correct = 0
 
     with torch.no_grad():
@@ -119,23 +143,24 @@ def evaluate(model,
         for data, target in loader():
             data, target = data.to(device), target.to(device)
             output = model(data)
-            output = F.log_softmax(output, dim=1)
-            eval_loss += F.nll_loss(output, target, reduction='sum').item()
+            loss = criterion(output, target)
+
+            losses.update(loss.item(), data.size(0))
+
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
             len_data_cum += len(data)
             desc = {
-                'Loss ': ' {:5.4f}'.format(eval_loss / len_data_cum),
+                'Loss ': ' {:5.4f}'.format(losses.avg),
                 'Acc  ': ' {:3.4f}'.format(correct / len_data_cum)
             }
             loader.desc(desc)
-    eval_loss /= len(dataloader.dataset)
     accuracy = correct / len(dataloader.dataset)
-    writer.add_scalar('Eval/loss', eval_loss)
-    writer.add_scalar('Eval/acc', accuracy)
+    writer.add_scalar('Eval/loss', losses.avg, epoch)
+    writer.add_scalar('Eval/acc', accuracy, epoch)
 
-    return eval_loss, accuracy
+    return losses.avg, accuracy
 
 
 def inference_from_file(img_file):

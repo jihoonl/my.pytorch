@@ -1,0 +1,14 @@
+# cifar10
+
+DATASET: !include dataset.yaml
+MODEL: !include ../model/resnet101.yaml
+
+TRAIN:
+  EPOCH: 100
+  BATCH_SIZE: 56
+  OPTIMIZER:
+    PARAM:
+      lr: 0.01
+      momentum: 0.9
+      weight_decay: 1e-4
+  LR_SCHEDULER: !include ../lr_scheduler/multi_step.yaml

@@ -45,7 +45,7 @@ __C.DATASET.NUM_WORKERS = num_gpu * 4  # Advice from pytorch forum
 __C.TRAIN = AttrDict()
 __C.TRAIN.BATCH_SIZE = 16
 __C.TRAIN.EPOCH = 10
-__C.TRAIN.EVAL_EPOCH = lambda: int(__C.TRAIN.EPOCH / 5)
+__C.TRAIN.EVAL_EPOCH = 1  # lambda: int(__C.TRAIN.EPOCH / 5)
 __C.TRAIN.EVAL_TRAIN = False
 
 __C.TRAIN.OPTIMIZER = AttrDict()
@@ -55,13 +55,20 @@ __C.TRAIN.OPTIMIZER.PARAM.lr = 0.01
 __C.TRAIN.OPTIMIZER.PARAM.momentum = 0.9
 __C.TRAIN.OPTIMIZER.PARAM.weight_decay = 0.01
 __C.TRAIN.OPTIMIZER.PARAM.nesterov = True
+__C.TRAIN.OPTIMIZER_CLIP = AttrDict()
+__C.TRAIN.OPTIMIZER_CLIP.enabled = True
+__C.TRAIN.OPTIMIZER_CLIP.config = dict(max_norm=35, norm_type=2)
 
 __C.TRAIN.LR_SCHEDULER = AttrDict()
-__C.TRAIN.LR_SCHEDULER.MODEL = 'step'
-__C.TRAIN.LR_SCHEDULER.STEPS = [1]
-__C.TRAIN.LR_SCHEDULER.GAMMA = 0.98
-__C.TRAIN.LR_SCHEDULER.WARM_UP_EPOCHS = 0
-__C.TRAIN.LR_SCHEDULER.MAX_EPOCHS = lambda: __C.TRAIN.EPOCH - __C.TRAIN.LR_SCHEDULER.WARM_UP_EPOCHS
+__C.TRAIN.LR_SCHEDULER.MODEL = 'multi_step'
+__C.TRAIN.LR_SCHEDULER.STEPS = [30, 80]
+__C.TRAIN.LR_SCHEDULER.GAMMA = 0.1
+__C.TRAIN.LR_SCHEDULER.WARMUP = AttrDict()
+__C.TRAIN.LR_SCHEDULER.WARMUP.type = 'linear'
+__C.TRAIN.LR_SCHEDULER.WARMUP.iter = 500
+__C.TRAIN.LR_SCHEDULER.WARMUP.ratio = 1.0 / 3
+
+__C.TRAIN.LR_SCHEDULER.MAX_EPOCHS = lambda: __C.TRAIN.EPOCH
 
 __C.MODEL = AttrDict()
 __C.MODEL.NAME = ''
@@ -81,19 +88,18 @@ __C.EXP.PREFIX = lambda: __C.DATASET.PREFIX
 __C.EXP.PATH = lambda: os.path.join(EXP_ROOT, __C.EXP.PREFIX)
 __C.EXP.LEADERBOARD = AttrDict()
 __C.EXP.LEADERBOARD.PREFIX = 'leaderboard'
-__C.EXP.LEADERBOARD.PATH = lambda: os.path.join(__C.EXP.PATH, __C.EXP.LEADERBOARD.PREFIX)
+__C.EXP.LEADERBOARD.PATH = lambda: os.path.join(__C.EXP.PATH, __C.EXP.
+                                                LEADERBOARD.PREFIX)
 __C.EXP.LEADERBOARD.MAX = 20
 __C.EXP.LEADERBOARD.TOP1_CHECKPOINT = 'top.pth'
 __C.EXP.LEADERBOARD.TOP1_CONFIG = 'config.yaml'
-
-__C.LOG_DIR = lambda: __C.EXP.PATH
 
 __C.RESUME = AttrDict()
 __C.RESUME.CHECKPOINT = ''
 __C.RESUME.SCOPE = ''
 
 __C.TEST = AttrDict()
-__C.TEST.BATCH_SIZE = 16
+__C.TEST.BATCH_SIZE = lambda: __C.TRAIN.BATCH_SIZE
 
 
 def cfg_from_file(filename):
@@ -103,3 +109,17 @@ def cfg_from_file(filename):
         yaml_cfg = AttrDict(yaml.load(f, YAMLLoader))
 
     __C.merge(yaml_cfg)
+
+
+def get_logdir_name(time):
+    c = dict(
+        model=__C.MODEL.NAME.split('.')[-1],
+        batch_size=__C.TRAIN.BATCH_SIZE,
+        num_gpu=num_gpu,
+        optimizer=__C.TRAIN.OPTIMIZER.MODEL,
+        lr_rate=cfg.TRAIN.OPTIMIZER.PARAM.lr,
+        lr_scheduler=cfg.TRAIN.LR_SCHEDULER.MODEL,
+    )
+    config = '_'.join([str(v) for v in c.values()])
+    dirpath = os.path.join(__C.EXP.PATH, config, time)
+    return dirpath

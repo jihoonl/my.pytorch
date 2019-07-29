@@ -1,20 +1,21 @@
 import os
+
 import torch
 import yaml
 
-from .logger import logger
-from .config import cfg
+from .config import cfg, get_logdir_name
 from .leaderboard import Leaderboard
+from .logger import logger
 
 CHECKPOINT = 'checkpoint.txt'
 CONFIG_NAME = 'config.yaml'
 
 
-def export(model, log, multi_gpu, time, epoch=None):
+def export(model, log, multi_gpu, time, epoch=None, extra=None):
     """
     Exports the current model, checkpoint, and config
     """
-    dirpath = os.path.join(cfg.EXP.PATH, time)
+    dirpath = get_logdir_name(time)
     if not os.path.exists(dirpath):
         os.makedirs(dirpath)
     filename = '{}.pth'.format('final' if not epoch else str(epoch))
@@ -46,11 +47,10 @@ def _export_checkpoint(dirpath, filename, log):
     cppath = os.path.join(dirpath, CHECKPOINT)
     if not os.path.exists(cppath):
         with open(cppath, 'w') as f:
-            print(
-                '#{:>9s} {:>10s} {:>10s} {:>10s} {:>10s}'.format(
-                    'File,', 'Test Acc,', 'Test Loss,', 'Train Acc,',
-                    'Train Loss,'),
-                file=f)
+            print('#{:>9s} {:>10s} {:>10s} {:>10s} {:>10s}'.format(
+                'File,', 'Test Acc,', 'Test Loss,', 'Train Acc,',
+                'Train Loss,'),
+                  file=f)
     with open(os.path.join(cppath), 'a') as f:
         print('{}, {}'.format(filename, log), file=f)
 

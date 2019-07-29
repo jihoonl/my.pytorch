@@ -22,6 +22,19 @@ def parse_args():
         default='',
         type=str,
         dest='config')
+    parser.add_argument(
+        '-lr',
+        '--learning-rate',
+        help='learning rate',
+        default=0.0,
+        type=float,
+        dest='learning_rate')
+    parser.add_argument(
+        '--batch-size',
+        help='batch size',
+        default=0,
+        type=int,
+        dest='batch_size')
     return parser.parse_args()
 
 
@@ -33,6 +46,11 @@ def main():
     if args.config:
         logger.info('Loading config from {}'.format(args.config))
         cfg_from_file(args.config)
+
+        if args.learning_rate > 0.0:
+            cfg.TRAIN.OPTIMIZER.PARAM.lr = args.learning_rate
+        if args.batch_size > 0:
+            cfg.TRAIN.BATCH_SIZE = args.batch_size
 
     logger.info("Use GPU      : {}".format(cfg.GPU.USE))
     logger.info("Number of GPU: {}".format(cfg.GPU.NUM))

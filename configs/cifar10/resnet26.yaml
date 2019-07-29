@@ -1,19 +1,14 @@
-
-# MNIST dataset
+# cifar10
 
 DATASET: !include dataset.yaml
 MODEL: !include ../model/resnet26.yaml
 
 TRAIN:
-  EPOCH: 10
-  EVAL_TRAIN: True
+  EPOCH: 100
   BATCH_SIZE: 56
   OPTIMIZER:
     PARAM:
       lr: 0.01
       momentum: 0.9
       weight_decay: 1e-4
-  LR_SCHEDULER:
-    MODEK: 'multi_step'
-    STEPS: [5, 8]
-    GAMMA: 0.1
+  LR_SCHEDULER: !include ../lr_scheduler/multi_step.yaml
