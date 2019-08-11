@@ -8,7 +8,7 @@ TRAIN:
   BATCH_SIZE: 56
   OPTIMIZER:
     PARAM:
-      lr: 0.01
+      lr: 0.1
       momentum: 0.9
       weight_decay: 1e-4
   LR_SCHEDULER: !include ../lr_scheduler/multi_step.yaml

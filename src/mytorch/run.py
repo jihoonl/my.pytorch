@@ -44,7 +44,7 @@ def train_model():
 
     l = None
     for e in range(1, epoch + 1):
-        lr_scheduler.step(epoch)
+        lr_scheduler.step(e - 1)
         train(model,
               train_loader,
               device,
@@ -97,6 +97,7 @@ def train(model,
 
     model.train()
     loader = Progressbar(dataloader, name, epoch, max_epoch)
+    lr = optimizer.param_groups[0]['lr']
     for i, (data, target) in enumerate(loader()):
         #lr_scheduler.step_iter(i * epoch)
         data, target = data.to(device), target.to(device)
@@ -110,9 +111,7 @@ def train(model,
             clip_grad(model.parameters(), cfg.TRAIN.OPTIMIZER_CLIP.config)
         optimizer.step()
 
-        desc = {
-            'Loss ': ' {:5.4f}'.format(loss),
-        }
+        desc = {'Loss ': ' {:5.4f}'.format(loss), 'lr ': '{:1.6f}'.format(lr)}
         loader.desc(desc)
     lr = optimizer.param_groups[0]['lr']
     writer.add_scalar('Train/loss', losses.avg, epoch)

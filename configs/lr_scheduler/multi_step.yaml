@@ -1,5 +1,5 @@
 # Step LR Scheduler
 
 MODEL: 'multi_step'
-STEPS: [30, 80]
+STEPS: [50, 80]
 GAMMA: 0.1
